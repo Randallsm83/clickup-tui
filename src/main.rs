@@ -18,10 +18,7 @@ use crossterm::{
     terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
 };
 use models::TaskGroup;
-use ratatui::{
-    backend::CrosstermBackend,
-    Terminal,
-};
+use ratatui::{backend::CrosstermBackend, Terminal};
 use std::io;
 use std::time::Duration;
 
@@ -125,102 +122,98 @@ async fn run_app(
                 match app.input_mode {
                     InputMode::Normal => {
                         match key.code {
-                        KeyCode::Char('q') => {
-                            app.should_quit = true;
-                        }
-                        KeyCode::Char('j') | KeyCode::Down => {
-                            match app.focused_pane {
+                            KeyCode::Char('q') => {
+                                app.should_quit = true;
+                            }
+                            KeyCode::Char('j') | KeyCode::Down => match app.focused_pane {
                                 FocusedPane::TaskList => {
                                     app.select_next();
                                     app.reset_preview_scroll();
                                 }
                                 FocusedPane::Preview => app.scroll_preview_down(),
-                            }
-                        }
-                        KeyCode::Char('k') | KeyCode::Up => {
-                            match app.focused_pane {
+                            },
+                            KeyCode::Char('k') | KeyCode::Up => match app.focused_pane {
                                 FocusedPane::TaskList => {
                                     app.select_prev();
                                     app.reset_preview_scroll();
                                 }
                                 FocusedPane::Preview => app.scroll_preview_up(),
+                            },
+                            KeyCode::Char('1') => {
+                                app.switch_group(TaskGroup::MyAction);
                             }
-                        }
-                        KeyCode::Char('1') => {
-                            app.switch_group(TaskGroup::MyAction);
-                        }
-                        KeyCode::Char('2') => {
-                            app.switch_group(TaskGroup::Waiting);
-                        }
-                        KeyCode::Char('3') => {
-                            app.switch_group(TaskGroup::Backlog);
-                        }
-                        KeyCode::Char('4') => {
-                            app.switch_group(TaskGroup::Done);
-                        }
-                        KeyCode::Char('5') => {
-                            app.switch_group(TaskGroup::Snoozed);
-                        }
-                        KeyCode::Char('6') => {
-                            app.switch_group(TaskGroup::Person);
-                        }
-                        KeyCode::Tab => {
-                            app.focus_next_pane();
-                        }
-                        KeyCode::BackTab => {
-                            app.focus_prev_pane();
-                        }
-                        KeyCode::Char('l') => {
-                            app.next_tab();
-                        }
-                        KeyCode::Char('h') => {
-                            app.prev_tab();
-                        }
-                        KeyCode::Char('p') => {
-                            app.toggle_pin();
-                        }
-                        KeyCode::Char('s') => {
-                            app.start_snooze();
-                        }
-                        KeyCode::Char('S') => {
-                            app.unsnooze();
-                        }
-                        KeyCode::Char('o') | KeyCode::Enter => {
-                            app.open_in_browser();
-                        }
-                        KeyCode::Char('y') => {
-                            app.copy_to_clipboard();
-                        }
-                        KeyCode::Char('/') => {
-                            app.start_search();
-                        }
-                        KeyCode::Char('r') => {
-                            // Refresh tasks
-                            app.is_loading = true;
-                            app.status_message = Some("Refreshing...".to_string());
-                            terminal.draw(|f| ui::render(f, app))?;
+                            KeyCode::Char('2') => {
+                                app.switch_group(TaskGroup::Waiting);
+                            }
+                            KeyCode::Char('3') => {
+                                app.switch_group(TaskGroup::Backlog);
+                            }
+                            KeyCode::Char('4') => {
+                                app.switch_group(TaskGroup::Done);
+                            }
+                            KeyCode::Char('5') => {
+                                app.switch_group(TaskGroup::Snoozed);
+                            }
+                            KeyCode::Char('6') => {
+                                app.switch_group(TaskGroup::Person);
+                            }
+                            KeyCode::Tab => {
+                                app.focus_next_pane();
+                            }
+                            KeyCode::BackTab => {
+                                app.focus_prev_pane();
+                            }
+                            KeyCode::Char('l') => {
+                                app.next_tab();
+                            }
+                            KeyCode::Char('h') => {
+                                app.prev_tab();
+                            }
+                            KeyCode::Char('p') => {
+                                app.toggle_pin();
+                            }
+                            KeyCode::Char('s') => {
+                                app.start_snooze();
+                            }
+                            KeyCode::Char('S') => {
+                                app.unsnooze();
+                            }
+                            KeyCode::Char('o') | KeyCode::Enter => {
+                                app.open_in_browser();
+                            }
+                            KeyCode::Char('y') => {
+                                app.copy_to_clipboard();
+                            }
+                            KeyCode::Char('/') => {
+                                app.start_search();
+                            }
+                            KeyCode::Char('r') => {
+                                // Refresh tasks
+                                app.is_loading = true;
+                                app.status_message = Some("Refreshing...".to_string());
+                                terminal.draw(|f| ui::render(f, app))?;
 
-                            match fetch_tasks(config).await {
-                                Ok(tasks) => {
-                                    app.set_tasks(tasks);
-                                    app.is_loading = false;
-                                    app.status_message =
-                                        Some(format!("Loaded {} tasks", app.tasks.len()));
-                                    let _ = app.save_tasks_cache();
-                                    let _ = app.save_local_state();
-                                }
-                                Err(e) => {
-                                    app.is_loading = false;
-                                    app.status_message = Some(format!("Failed: {}", e));
+                                match fetch_tasks(config).await {
+                                    Ok(tasks) => {
+                                        app.set_tasks(tasks);
+                                        app.is_loading = false;
+                                        app.status_message =
+                                            Some(format!("Loaded {} tasks", app.tasks.len()));
+                                        let _ = app.save_tasks_cache();
+                                        let _ = app.save_local_state();
+                                    }
+                                    Err(e) => {
+                                        app.is_loading = false;
+                                        app.status_message = Some(format!("Failed: {}", e));
+                                    }
                                 }
                             }
+                            KeyCode::Char('?') => {
+                                app.show_help = true;
+                                app.input_mode = InputMode::Help;
+                            }
+                            _ => {}
                         }
-                        KeyCode::Char('?') => {
-                            app.show_help = true;
-                            app.input_mode = InputMode::Help;
-                        }
-                        _ => {}
-                    }
                     }
                     InputMode::Search => match key.code {
                         KeyCode::Esc => {
@@ -237,7 +230,9 @@ async fn run_app(
                             }
                             app.input_mode = InputMode::Normal;
                         }
-                        KeyCode::Down | KeyCode::Char('j') if key.modifiers.is_empty() || app.search_query.is_empty() => {
+                        KeyCode::Down | KeyCode::Char('j')
+                            if key.modifiers.is_empty() || app.search_query.is_empty() =>
+                        {
                             // j navigates when query is empty, otherwise types
                             if app.search_query.is_empty() || key.code == KeyCode::Down {
                                 app.search_select_next();
@@ -245,7 +240,9 @@ async fn run_app(
                                 app.handle_char('j');
                             }
                         }
-                        KeyCode::Up | KeyCode::Char('k') if key.modifiers.is_empty() || app.search_query.is_empty() => {
+                        KeyCode::Up | KeyCode::Char('k')
+                            if key.modifiers.is_empty() || app.search_query.is_empty() =>
+                        {
                             if app.search_query.is_empty() || key.code == KeyCode::Up {
                                 app.search_select_prev();
                             } else {

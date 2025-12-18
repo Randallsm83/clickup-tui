@@ -109,7 +109,10 @@ impl ClickUpClient {
             anyhow::bail!("ClickUp API error ({}): {}", status, body);
         }
 
-        let teams: TeamsResponse = response.json().await.context("Failed to parse teams response")?;
+        let teams: TeamsResponse = response
+            .json()
+            .await
+            .context("Failed to parse teams response")?;
 
         teams
             .teams

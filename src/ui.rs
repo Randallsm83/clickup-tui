@@ -1,9 +1,9 @@
 //! TUI rendering with ratatui
 
 use crate::app::{App, FocusedPane, InputMode};
+use crate::models::DisplayTask;
 use crate::models::TaskGroup;
 use crate::theme;
-use crate::models::DisplayTask;
 use ratatui::{
     layout::{Constraint, Direction, Layout, Margin, Rect},
     style::{Modifier, Style},
@@ -15,7 +15,10 @@ use ratatui::{
 /// Render the entire UI
 pub fn render(frame: &mut Frame, app: &App) {
     // Add outer margin for breathing room
-    let outer_area = frame.area().inner(Margin { horizontal: 1, vertical: 0 });
+    let outer_area = frame.area().inner(Margin {
+        horizontal: 1,
+        vertical: 0,
+    });
 
     // In search mode, show search-specific split pane
     if app.input_mode == InputMode::Search {
@@ -58,7 +61,7 @@ pub fn render(frame: &mut Frame, app: &App) {
 /// Render help overlay with legend
 fn render_help_overlay(frame: &mut Frame) {
     let area = frame.area();
-    
+
     // Center the help popup (70% width, 80% height)
     let popup_width = (area.width * 70 / 100).min(80);
     let popup_height = (area.height * 80 / 100).min(35);
@@ -70,7 +73,12 @@ fn render_help_overlay(frame: &mut Frame) {
     frame.render_widget(Clear, popup_area);
 
     let help_content: Vec<Line<'static>> = vec![
-        Line::from(Span::styled("KEYBINDINGS", Style::default().fg(theme::BLUE).add_modifier(Modifier::BOLD))),
+        Line::from(Span::styled(
+            "KEYBINDINGS",
+            Style::default()
+                .fg(theme::BLUE)
+                .add_modifier(Modifier::BOLD),
+        )),
         Line::from(""),
         Line::from(vec![
             Span::styled("  j/k, ↑/↓  ", Style::default().fg(theme::CYAN)),
@@ -82,7 +90,10 @@ fn render_help_overlay(frame: &mut Frame) {
         ]),
         Line::from(vec![
             Span::styled("  1-6       ", Style::default().fg(theme::CYAN)),
-            Span::styled("Jump to tab (My Action, Waiting, Backlog, Done, Snoozed, Person)", Style::default().fg(theme::FG)),
+            Span::styled(
+                "Jump to tab (My Action, Waiting, Backlog, Done, Snoozed, Person)",
+                Style::default().fg(theme::FG),
+            ),
         ]),
         Line::from(vec![
             Span::styled("  o, Enter  ", Style::default().fg(theme::CYAN)),
@@ -121,7 +132,12 @@ fn render_help_overlay(frame: &mut Frame) {
             Span::styled("Quit", Style::default().fg(theme::FG)),
         ]),
         Line::from(""),
-        Line::from(Span::styled("PRIORITY INDICATORS", Style::default().fg(theme::BLUE).add_modifier(Modifier::BOLD))),
+        Line::from(Span::styled(
+            "PRIORITY INDICATORS",
+            Style::default()
+                .fg(theme::BLUE)
+                .add_modifier(Modifier::BOLD),
+        )),
         Line::from(""),
         Line::from(vec![
             Span::styled("  !!  ", Style::default().fg(theme::ORANGE)),
@@ -140,7 +156,12 @@ fn render_help_overlay(frame: &mut Frame) {
             Span::styled("Low", Style::default().fg(theme::FG)),
         ]),
         Line::from(""),
-        Line::from(Span::styled("SYMBOLS", Style::default().fg(theme::BLUE).add_modifier(Modifier::BOLD))),
+        Line::from(Span::styled(
+            "SYMBOLS",
+            Style::default()
+                .fg(theme::BLUE)
+                .add_modifier(Modifier::BOLD),
+        )),
         Line::from(""),
         Line::from(vec![
             Span::styled("  📌  ", Style::default().fg(theme::YELLOW)),
@@ -148,10 +169,18 @@ fn render_help_overlay(frame: &mut Frame) {
         ]),
         Line::from(vec![
             Span::styled("  └   ", Style::default().fg(theme::MUTED)),
-            Span::styled("Subtask (child of another task)", Style::default().fg(theme::FG)),
+            Span::styled(
+                "Subtask (child of another task)",
+                Style::default().fg(theme::FG),
+            ),
         ]),
         Line::from(""),
-        Line::from(Span::styled("STATUS COLORS", Style::default().fg(theme::BLUE).add_modifier(Modifier::BOLD))),
+        Line::from(Span::styled(
+            "STATUS COLORS",
+            Style::default()
+                .fg(theme::BLUE)
+                .add_modifier(Modifier::BOLD),
+        )),
         Line::from(""),
         Line::from(vec![
             Span::styled("  ████  ", Style::default().fg(theme::STATUS_IN_PROGRESS)),
@@ -178,7 +207,10 @@ fn render_help_overlay(frame: &mut Frame) {
             Span::styled("Done / Completed", Style::default().fg(theme::FG)),
         ]),
         Line::from(""),
-        Line::from(Span::styled("Press Esc, q, or ? to close", Style::default().fg(theme::MUTED))),
+        Line::from(Span::styled(
+            "Press Esc, q, or ? to close",
+            Style::default().fg(theme::MUTED),
+        )),
     ];
 
     let help = Paragraph::new(help_content)
@@ -188,7 +220,9 @@ fn render_help_overlay(frame: &mut Frame) {
                 .border_style(Style::default().fg(theme::BLUE))
                 .title(Span::styled(
                     " Help ",
-                    Style::default().fg(theme::BLUE).add_modifier(Modifier::BOLD),
+                    Style::default()
+                        .fg(theme::BLUE)
+                        .add_modifier(Modifier::BOLD),
                 )),
         )
         .style(Style::default().bg(theme::SELECTED_BG));
@@ -222,10 +256,7 @@ fn render_normal_preview_pane(frame: &mut Frame, app: &App, area: Rect) {
             Block::default()
                 .borders(Borders::ALL)
                 .border_style(Style::default().fg(border_color))
-                .title(Span::styled(
-                    " Details ",
-                    Style::default().fg(theme::CYAN),
-                )),
+                .title(Span::styled(" Details ", Style::default().fg(theme::CYAN))),
         );
 
     frame.render_widget(preview, area);
@@ -234,7 +265,10 @@ fn render_normal_preview_pane(frame: &mut Frame, app: &App, area: Rect) {
 /// Render search mode with split pane (results left, preview right)
 fn render_search_mode(frame: &mut Frame, app: &App) {
     // Add outer margin for breathing room
-    let outer_area = frame.area().inner(Margin { horizontal: 1, vertical: 0 });
+    let outer_area = frame.area().inner(Margin {
+        horizontal: 1,
+        vertical: 0,
+    });
 
     let main_chunks = Layout::default()
         .direction(Direction::Vertical)
@@ -319,9 +353,7 @@ fn render_search_results(frame: &mut Frame, app: &App, area: Rect) {
             };
 
             let name_style = if is_selected {
-                Style::default()
-                    .fg(theme::FG)
-                    .add_modifier(Modifier::BOLD)
+                Style::default().fg(theme::FG).add_modifier(Modifier::BOLD)
             } else {
                 Style::default().fg(theme::FG)
             };
@@ -375,17 +407,12 @@ fn render_preview_pane(frame: &mut Frame, app: &App, area: Rect) {
         ))]
     };
 
-    let preview = Paragraph::new(content)
-        .wrap(Wrap { trim: true })
-        .block(
-            Block::default()
-                .borders(Borders::ALL)
-                .border_style(Style::default().fg(theme::MUTED))
-                .title(Span::styled(
-                    " Preview ",
-                    Style::default().fg(theme::CYAN),
-                )),
-        );
+    let preview = Paragraph::new(content).wrap(Wrap { trim: true }).block(
+        Block::default()
+            .borders(Borders::ALL)
+            .border_style(Style::default().fg(theme::MUTED))
+            .title(Span::styled(" Preview ", Style::default().fg(theme::CYAN))),
+    );
 
     frame.render_widget(preview, area);
 }
@@ -398,16 +425,16 @@ fn build_preview_content(dt: &DisplayTask, _width: usize) -> Vec<Line<'static>> 
     if let Some(custom_id) = &dt.task.custom_id {
         lines.push(Line::from(Span::styled(
             custom_id.clone(),
-            Style::default().fg(theme::CYAN).add_modifier(Modifier::BOLD),
+            Style::default()
+                .fg(theme::CYAN)
+                .add_modifier(Modifier::BOLD),
         )));
     }
 
     // Task name (bold)
     lines.push(Line::from(Span::styled(
         dt.task.name.clone(),
-        Style::default()
-            .fg(theme::FG)
-            .add_modifier(Modifier::BOLD),
+        Style::default().fg(theme::FG).add_modifier(Modifier::BOLD),
     )));
     lines.push(Line::from(""));
 
@@ -564,32 +591,35 @@ fn render_task_list(frame: &mut Frame, app: &App, area: Rect) {
     let tasks = app.current_tasks();
 
     // Build set of task IDs in view for subtask detection
-    let visible_ids: std::collections::HashSet<String> = tasks.iter().map(|dt| dt.task.id.clone()).collect();
-    
+    let visible_ids: std::collections::HashSet<String> =
+        tasks.iter().map(|dt| dt.task.id.clone()).collect();
+
     // Build map of task_id -> all_tasks for depth calculation
-    let all_tasks_map: std::collections::HashMap<String, &DisplayTask> = 
+    let all_tasks_map: std::collections::HashMap<String, &DisplayTask> =
         tasks.iter().map(|dt| (dt.task.id.clone(), dt)).collect();
 
     let mut items: Vec<ListItem> = Vec::new();
-    let mut task_index = 0;
 
-    for dt in &tasks {
+    for (task_index, dt) in tasks.iter().enumerate() {
         let is_selected = task_index == app.selected_index;
-        
+
         // Calculate depth (how many ancestors are visible)
         let mut depth = 0usize;
         let mut current_parent = dt.task.parent_id.clone();
         while let Some(pid) = current_parent {
             if visible_ids.contains(&pid) {
                 depth += 1;
-                current_parent = all_tasks_map.get(&pid).and_then(|p| p.task.parent_id.clone());
+                current_parent = all_tasks_map
+                    .get(&pid)
+                    .and_then(|p| p.task.parent_id.clone());
             } else {
                 break;
             }
         }
 
         // Check if user is assigned to this task
-        let is_assigned = app.user_id
+        let is_assigned = app
+            .user_id
             .map(|uid| dt.task.is_assigned_to(uid))
             .unwrap_or(true);
 
@@ -620,12 +650,17 @@ fn render_task_list(frame: &mut Frame, app: &App, area: Rect) {
         let status_tag = format!("[{}] ", dt.task.status);
 
         // Task type tag
-        let type_tag = dt.task.task_type_label()
+        let type_tag = dt
+            .task
+            .task_type_label()
             .map(|t| format!("[{}] ", t))
             .unwrap_or_default();
 
         // Custom ID
-        let custom_id_str = dt.task.custom_id.as_ref()
+        let custom_id_str = dt
+            .task
+            .custom_id
+            .as_ref()
             .map(|id| format!("{} ", id))
             .unwrap_or_default();
 
@@ -640,16 +675,19 @@ fn render_task_list(frame: &mut Frame, app: &App, area: Rect) {
 
         // Build spans - all tasks start with pin+priority (4 chars), subtasks add indent after
         let mut spans: Vec<Span> = Vec::new();
-        
+
         spans.push(Span::raw(pin_icon));
         spans.push(Span::styled(priority_indicator, priority_style));
         spans.push(Span::raw(" ")); // spacing
-        
+
         // Add depth-based indentation for nested tasks
         if depth > 0 {
             // Add spaces for each level of depth, then the tree character
             let indent = "  ".repeat(depth.saturating_sub(1));
-            spans.push(Span::styled(format!("{}└ ", indent), Style::default().fg(theme::MUTED)));
+            spans.push(Span::styled(
+                format!("{}└ ", indent),
+                Style::default().fg(theme::MUTED),
+            ));
         }
 
         // Status inline
@@ -662,7 +700,10 @@ fn render_task_list(frame: &mut Frame, app: &App, area: Rect) {
 
         // Custom ID with spacing
         if !custom_id_str.is_empty() {
-            spans.push(Span::styled(custom_id_str, Style::default().fg(theme::CYAN)));
+            spans.push(Span::styled(
+                custom_id_str,
+                Style::default().fg(theme::CYAN),
+            ));
         }
 
         // Task name
@@ -675,8 +716,6 @@ fn render_task_list(frame: &mut Frame, app: &App, area: Rect) {
             ListItem::new(line)
         };
         items.push(item);
-
-        task_index += 1;
     }
 
     let title = if app.input_mode == InputMode::Search {

@@ -242,7 +242,12 @@ impl DisplayTask {
 
     /// Determine the effective group (considering snooze)
     pub fn effective_group(&self) -> TaskGroup {
-        if self.overlay.snoozed_until.map(|u| u > Utc::now()).unwrap_or(false) {
+        if self
+            .overlay
+            .snoozed_until
+            .map(|u| u > Utc::now())
+            .unwrap_or(false)
+        {
             TaskGroup::Snoozed
         } else {
             self.task.group()
