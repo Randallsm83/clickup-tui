@@ -494,51 +494,15 @@ impl App {
         }
     }
 
-    /// Copy selected task details to clipboard
+    /// Copy selected task name to clipboard
     pub fn copy_to_clipboard(&mut self) {
         if let Some(task) = self.selected_task() {
-            let mut text = String::new();
-            
-            // Task name
-            text.push_str(&task.task.name);
-            text.push_str("\n\n");
-            
-            // Custom ID if present (e.g., "PROJ-123")
-            if let Some(custom_id) = &task.task.custom_id {
-                text.push_str(&format!("ID: {}\n", custom_id));
-            }
-            
-            // Status and list
-            text.push_str(&format!("Status: {}\n", task.task.status));
-            text.push_str(&format!("List: {}\n", task.task.list_name));
-            
-            // Priority if present
-            if let Some(priority_label) = task.task.priority_label() {
-                text.push_str(&format!("Priority: {}\n", priority_label));
-            }
-            
-            // Tags if present
-            if !task.task.tags.is_empty() {
-                text.push_str(&format!("Tags: {}\n", task.task.tags.join(", ")));
-            }
-            
-            // URL
-            text.push_str(&format!("\n{}\n", task.task.url));
-            
-            // Description if present
-            if let Some(desc) = &task.task.description {
-                if !desc.trim().is_empty() {
-                    text.push_str(&format!("\n---\n{}\n", desc.trim()));
-                }
-            }
-            
-            // Copy to clipboard
             match arboard::Clipboard::new() {
                 Ok(mut clipboard) => {
-                    if let Err(e) = clipboard.set_text(&text) {
+                    if let Err(e) = clipboard.set_text(&task.task.name) {
                         self.status_message = Some(format!("Failed to copy: {}", e));
                     } else {
-                        self.status_message = Some("Copied to clipboard".to_string());
+                        self.status_message = Some("Copied task name".to_string());
                     }
                 }
                 Err(e) => {
