@@ -116,7 +116,6 @@ impl Config {
 
         Ok(())
     }
-
 }
 
 #[cfg(test)]

@@ -175,18 +175,25 @@ impl App {
         let all_tasks: HashMap<String, DisplayTask> = self
             .tasks
             .iter()
-            .map(|t| (t.id.clone(), DisplayTask::new(t.clone(), self.local_state.get_overlay(&t.id))))
+            .map(|t| {
+                (
+                    t.id.clone(),
+                    DisplayTask::new(t.clone(), self.local_state.get_overlay(&t.id)),
+                )
+            })
             .collect();
 
         // Get tasks assigned to user in this group (iterate self.tasks for stable order)
-        let my_tasks: Vec<DisplayTask> = self.tasks
+        let my_tasks: Vec<DisplayTask> = self
+            .tasks
             .iter()
             .map(|t| DisplayTask::new(t.clone(), self.local_state.get_overlay(&t.id)))
             .filter(|dt| {
                 let in_group = if self.current_group == TaskGroup::Person {
                     dt.task.custom_item_id == Some(1020)
                 } else {
-                    dt.task.custom_item_id != Some(1020) && dt.effective_group() == self.current_group
+                    dt.task.custom_item_id != Some(1020)
+                        && dt.effective_group() == self.current_group
                 };
                 let is_assigned = user_id
                     .map(|uid| dt.task.is_assigned_to(uid))
@@ -201,7 +208,12 @@ impl App {
                     dt.task.name.to_lowercase().contains(&query)
                         || dt.task.list_name.to_lowercase().contains(&query)
                         || dt.task.status.to_lowercase().contains(&query)
-                        || dt.task.description.as_ref().map(|d| d.to_lowercase().contains(&query)).unwrap_or(false)
+                        || dt
+                            .task
+                            .description
+                            .as_ref()
+                            .map(|d| d.to_lowercase().contains(&query))
+                            .unwrap_or(false)
                 }
             })
             .collect();
@@ -214,7 +226,7 @@ impl App {
             // Add ancestor chain (stop at first unassigned ancestor)
             let mut ancestors: Vec<DisplayTask> = Vec::new();
             let mut current_parent_id = dt.task.parent_id.clone();
-            
+
             while let Some(pid) = current_parent_id {
                 if let Some(parent) = all_tasks.get(&pid) {
                     ancestors.push(parent.clone());
@@ -284,7 +296,7 @@ impl App {
             // Compare by root's priority
             let root_a_priority = all_tasks.get(&root_a).and_then(|t| t.task.priority);
             let root_b_priority = all_tasks.get(&root_b).and_then(|t| t.task.priority);
-            
+
             let priority_cmp = match (root_a_priority, root_b_priority) {
                 (Some(pa), Some(pb)) => pa.cmp(&pb),
                 (Some(_), None) => std::cmp::Ordering::Less,
@@ -361,10 +373,16 @@ impl App {
                     .or_else(|| fuzzy_score(&dt.task.list_name, &query_chars))
                     .or_else(|| fuzzy_score(&dt.task.status, &query_chars))
                     .or_else(|| {
-                        dt.task.description.as_ref().and_then(|d| fuzzy_score(d, &query_chars))
+                        dt.task
+                            .description
+                            .as_ref()
+                            .and_then(|d| fuzzy_score(d, &query_chars))
                     })
                     .or_else(|| {
-                        dt.task.tags.iter().find_map(|tag| fuzzy_score(tag, &query_chars))
+                        dt.task
+                            .tags
+                            .iter()
+                            .find_map(|tag| fuzzy_score(tag, &query_chars))
                     });
                 score.map(|s| (dt, s))
             })
