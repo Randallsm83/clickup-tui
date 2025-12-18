@@ -4,6 +4,8 @@ A terminal UI for organizing ClickUp tasks with a personal workflow overlay.
 
 ![Spaceduck themed TUI](https://img.shields.io/badge/theme-spaceduck-purple)
 
+![Main View](assets/main-view.png)
+
 ## The Problem
 
 ClickUp's "My Work" view is broken for developer workflows:
@@ -78,6 +80,18 @@ Alternatively, look at the network tab in ClickUp's web app when loading your ta
 ```bash
 clickup-tui
 ```
+
+### Search
+
+Press `/` to open global fuzzy search across all tasks:
+
+![Search Mode](assets/search-mode.png)
+
+### Help
+
+Press `?` to show the help overlay:
+
+![Help Overlay](assets/help-overlay.png)
 
 ### Keybindings
 
