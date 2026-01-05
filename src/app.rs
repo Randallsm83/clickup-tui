@@ -512,15 +512,35 @@ impl App {
         }
     }
 
-    /// Copy selected task name to clipboard
+    /// Copy selected task details to clipboard
     pub fn copy_to_clipboard(&mut self) {
         if let Some(task) = self.selected_task() {
+            let mut parts = Vec::new();
+
+            // Status
+            parts.push(format!("[{}]", task.task.status));
+
+            // Type (if present)
+            if let Some(type_label) = task.task.task_type_label() {
+                parts.push(format!("[{}]", type_label));
+            }
+
+            // Custom ID (if present)
+            if let Some(custom_id) = &task.task.custom_id {
+                parts.push(custom_id.clone());
+            }
+
+            // Task name
+            parts.push(task.task.name.clone());
+
+            let text = parts.join(" ");
+
             match arboard::Clipboard::new() {
                 Ok(mut clipboard) => {
-                    if let Err(e) = clipboard.set_text(&task.task.name) {
+                    if let Err(e) = clipboard.set_text(&text) {
                         self.status_message = Some(format!("Failed to copy: {}", e));
                     } else {
-                        self.status_message = Some("Copied task name".to_string());
+                        self.status_message = Some("Copied task details".to_string());
                     }
                 }
                 Err(e) => {
